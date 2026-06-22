@@ -6,3 +6,8 @@
   from = "/api/log"
   to   = "/.netlify/functions/log"
   status = 200
+
+[[redirects]]
+  from = "/api/data"
+  to   = "/.netlify/functions/data"
+  status = 200
