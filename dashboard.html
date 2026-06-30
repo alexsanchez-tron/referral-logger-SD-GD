@@ -2,141 +2,377 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="Referral Logger"/>
-<title>Omnigreen — Referral Logger</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Omnigreen — Referral Dashboard</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
+/*
+  ═══════════════════════════════════════════════════════
+  OMNIGREEN ENTERPRISE COLOR SYSTEM
+  ═══════════════════════════════════════════════════════
+
+  NEUTRALS — Slate-based. Warm enough to avoid coldness,
+  neutral enough for long operational use. Reduces eye
+  strain vs pure black/white.
+  --slate-950  #0F172A  Page background (dark surfaces)
+  --slate-900  #1E293B  Card background
+  --slate-800  #334155  Borders, dividers
+  --slate-700  #475569  Muted icons
+  --slate-500  #64748B  Secondary text
+  --slate-400  #94A3B8  Tertiary text / placeholders
+  --slate-200  #E2E8F0  Light borders
+  --slate-100  #F1F5F9  Light page background
+  --slate-50   #F8FAFC  Card background (light mode)
+  --white      #FFFFFF
+
+  PRIMARY ACCENT — Emerald green. Brand-consistent with
+  Omnigreen, signals success/go/active. Used sparingly
+  for primary CTAs and key data highlights.
+  --emerald-600  #059669  Primary action, top KPI accent
+  --emerald-500  #10B981  Hover states, chart fills
+  --emerald-100  #D1FAE5  Success backgrounds
+  --emerald-700  #047857  Pressed states
+
+  GRASSDOOR — Slightly warmer green to distinguish from
+  brand primary while staying in the green family.
+  --gd  #16A34A  Grassdoor brand color
+
+  STASHDASH — Teal-blue. Clearly distinct from Grassdoor
+  green, professional, easy to distinguish in charts/tables.
+  --ss  #0891B2  Stashdash brand color
+
+  SEMANTIC COLORS:
+  Warning  #D97706  Amber — operational alerts
+  Error    #DC2626  Red   — critical issues
+  Info     #2563EB  Blue  — informational states
+  Success  #059669  Emerald — positive states
+*/
+
 :root {
-  --bg:#0D1F0F; --bg2:#132915; --bg3:#1A3A1C;
-  --border:#1E4020; --border2:#2A5C2D;
-  --green:#3CB554; --greenD:#1D9E75; --greenM:#5DCAA5;
-  --white:#E8F5E3; --white2:#B8D9BC; --white3:#5A8F5E; --white4:#3A5E3D;
-  --red:#FF4D6A; --gd:#3CB554; --ss:#5DCAA5;
+  /* Neutrals */
+  --slate-950: #0F172A;
+  --slate-900: #1E293B;
+  --slate-800: #334155;
+  --slate-700: #475569;
+  --slate-600: #64748B;
+  --slate-400: #94A3B8;
+  --slate-300: #CBD5E1;
+  --slate-200: #E2E8F0;
+  --slate-100: #F1F5F9;
+  --slate-50:  #F8FAFC;
+  --white:     #FFFFFF;
+
+  /* Primary */
+  --emerald-700: #047857;
+  --emerald-600: #059669;
+  --emerald-500: #10B981;
+  --emerald-200: #A7F3D0;
+  --emerald-100: #D1FAE5;
+  --emerald-50:  #ECFDF5;
+
+  /* Company colors */
+  --gd:     #16A34A;
+  --gd-bg:  #F0FDF4;
+  --gd-border: #BBF7D0;
+  --ss:     #0891B2;
+  --ss-bg:  #ECFEFF;
+  --ss-border: #A5F3FC;
+
+  /* Semantic */
+  --warning:    #D97706;
+  --warning-bg: #FFFBEB;
+  --warning-border: #FDE68A;
+  --error:      #DC2626;
+  --error-bg:   #FEF2F2;
+  --error-border: #FECACA;
+  --info:       #2563EB;
+  --info-bg:    #EFF6FF;
+  --info-border:#BFDBFE;
+
+  /* Chart palette — desaturated, professional */
+  --chart-1: #059669;
+  --chart-2: #0891B2;
+  --chart-3: #7C3AED;
+  --chart-4: #D97706;
+  --chart-5: #DB2777;
+  --chart-6: #2563EB;
+  --chart-7: #65A30D;
+  --chart-8: #DC2626;
+  --chart-9: #9333EA;
+
+  /* Active theme vars — light mode default */
+  --bg:        var(--slate-100);
+  --surface:   var(--white);
+  --surface-2: var(--slate-50);
+  --border:    var(--slate-200);
+  --border-2:  var(--slate-300);
+  --text-primary:   #0F172A;
+  --text-secondary: #475569;
+  --text-muted:     #94A3B8;
+  --nav-bg:    var(--white);
+  --nav-border:var(--slate-200);
 }
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{background:var(--bg);color:var(--white);font-family:'Inter','Helvetica Neue',Arial,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
 
-/* ── Header ── */
-.header{background:#111;border-bottom:1px solid var(--border);padding:0 16px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
-.logo-row{display:flex;align-items:center;gap:10px;}
-.logo-mark{width:30px;height:30px;border-radius:9px;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.logo-name{font-size:14px;font-weight:700;color:var(--white);letter-spacing:-0.02em;}
-.logo-sub{font-size:9px;font-weight:600;color:var(--greenM);letter-spacing:0.07em;text-transform:uppercase;margin-top:1px;}
-.logged-pill{background:rgba(60,181,84,0.15);border:1px solid rgba(60,181,84,0.35);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--green);}
+[data-theme="dark"] {
+  --bg:        #0F172A;
+  --surface:   #1E293B;
+  --surface-2: #263347;
+  --border:    #334155;
+  --border-2:  #475569;
+  --text-primary:   #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted:     #475569;
+  --nav-bg:    #1E293B;
+  --nav-border:#334155;
+  --gd-bg:     rgba(22,163,74,0.12);
+  --gd-border: rgba(22,163,74,0.3);
+  --ss-bg:     rgba(8,145,178,0.12);
+  --ss-border: rgba(8,145,178,0.3);
+  --emerald-50: rgba(5,150,105,0.1);
+  --emerald-100:rgba(5,150,105,0.15);
+  --warning-bg: rgba(217,119,6,0.1);
+  --warning-border:rgba(217,119,6,0.3);
+  --error-bg:   rgba(220,38,38,0.1);
+  --error-border:rgba(220,38,38,0.3);
+  --info-bg:    rgba(37,99,235,0.1);
+  --info-border:rgba(37,99,235,0.3);
+  --surface: #1E293B;
+  --white: #1E293B;
+}
 
-/* ── Body ── */
-.body{padding:16px;max-width:480px;margin:0 auto;}
-.step-label{font-size:10px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--white3);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
-.step-num{width:18px;height:18px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--greenM);flex-shrink:0;}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.2s, color 0.2s;
+}
 
-/* ── Company tiles ── */
-.company-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
-.company-tile{background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:16px 12px;cursor:pointer;user-select:none;display:flex;flex-direction:column;align-items:center;gap:8px;transition:all 0.12s;position:relative;}
-.company-tile:active{transform:scale(0.96);}
-.company-tile.gd.selected{background:rgba(60,181,84,0.12);border-color:var(--gd);outline:2px solid rgba(60,181,84,0.2);outline-offset:1px;}
-.company-tile.ss.selected{background:rgba(93,202,165,0.12);border-color:var(--ss);outline:2px solid rgba(93,202,165,0.2);outline-offset:1px;}
-.company-icon-wrap{width:46px;height:46px;border-radius:13px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--white4);transition:color 0.12s,background 0.12s;}
-.company-tile.gd.selected .company-icon-wrap{color:var(--gd);background:rgba(60,181,84,0.18);}
-.company-tile.ss.selected .company-icon-wrap{color:var(--ss);background:rgba(93,202,165,0.18);}
-.company-name{font-size:13px;font-weight:600;color:var(--white3);text-align:center;transition:color 0.12s;}
-.company-tile.gd.selected .company-name{color:var(--gd);}
-.company-tile.ss.selected .company-name{color:var(--ss);}
-.company-check{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.12s;}
-.company-tile.gd.selected .company-check{background:var(--gd);opacity:1;}
-.company-tile.ss.selected .company-check{background:var(--ss);opacity:1;}
+/* ── Navigation ── */
+.nav {
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--nav-border);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.nav-left { display: flex; align-items: center; gap: 12px; }
+.nav-logo {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--emerald-600);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.nav-brand { font-size: 15px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
+.nav-sub { font-size: 11px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.02em; }
+.nav-divider { width: 1px; height: 20px; background: var(--border); }
+.nav-section { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+.nav-right { display: flex; align-items: center; gap: 8px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 6px; font-size: 13px;
+  font-weight: 500; cursor: pointer; border: 1px solid transparent;
+  font-family: 'Inter', sans-serif; transition: all 0.15s;
+  text-decoration: none;
+}
+.btn-primary { background: var(--emerald-600); color: #fff; border-color: var(--emerald-700); }
+.btn-primary:hover { background: var(--emerald-700); }
+.btn-secondary { background: var(--surface); color: var(--text-secondary); border-color: var(--border); }
+.btn-secondary:hover { background: var(--surface-2); color: var(--text-primary); }
+.btn-ghost { background: transparent; color: var(--text-secondary); border-color: transparent; }
+.btn-ghost:hover { background: var(--surface-2); }
+
+/* Live badge */
+.live-badge {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--emerald-50); border: 1px solid var(--emerald-200);
+  border-radius: 20px; padding: 4px 10px;
+  font-size: 11px; font-weight: 600; color: var(--emerald-600);
+  letter-spacing: 0.02em;
+}
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald-500); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+/* Theme toggle */
+.theme-btn {
+  width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--surface); cursor: pointer; display: flex; align-items: center;
+  justify-content: center; color: var(--text-secondary); font-size: 15px;
+}
+.theme-btn:hover { background: var(--surface-2); }
+
+/* ── Page layout ── */
+.page { max-width: 1200px; margin: 0 auto; padding: 24px 24px; }
+
+/* ── States ── */
+.loading {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; min-height: 320px; gap: 14px;
+  color: var(--text-muted);
+}
+.spinner {
+  width: 28px; height: 28px;
+  border: 2.5px solid var(--border); border-top-color: var(--emerald-500);
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-box {
+  background: var(--error-bg); border: 1px solid var(--error-border);
+  border-radius: 10px; padding: 16px 20px;
+  color: var(--error); font-size: 13px; text-align: center;
+}
+
+/* ── Section ── */
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+
+/* ── KPI grid ── */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 12px; margin-bottom: 24px; }
+.kpi-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 18px 20px;
+  position: relative; overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.kpi-accent { position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 10px 10px 0 0; }
+.kpi-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;
+}
+.kpi-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px; font-weight: 600; color: var(--text-primary);
+  line-height: 1; margin-bottom: 5px; letter-spacing: -0.02em;
+}
+.kpi-value.text { font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 600; }
+.kpi-sub { font-size: 12px; color: var(--text-muted); }
+.kpi-trend-up { color: var(--emerald-600); font-weight: 600; }
+.kpi-trend-down { color: var(--error); font-weight: 600; }
+
+/* ── Cards ── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 20px 22px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.card-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+.card-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
 
 /* ── Divider ── */
-.divider{height:1px;background:var(--border);margin:0 0 18px;}
+.divider { height: 1px; background: var(--border); margin: 24px 0; }
 
-/* ── Source grid ── */
-.src-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+/* ── Two col ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media(max-width:640px){ .two-col { grid-template-columns: 1fr; } }
 
-.tile{
-  background:var(--bg2);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:16px 14px 14px;
-  cursor:pointer;
-  user-select:none;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  transition:all 0.12s;
-  position:relative;
-  min-height:110px;
+/* ── Company split ── */
+.co-grid { display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 12px; margin-bottom: 24px; }
+@media(max-width:640px){ .co-grid { grid-template-columns: 1fr 1fr; } }
+.co-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px 18px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
-.tile:active{transform:scale(0.96);}
-.tile.selected{
-  background:rgba(60,181,84,0.1);
-  border-color:var(--green);
-  outline:2px solid rgba(60,181,84,0.2);
-  outline-offset:1px;
+.co-card-label { font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 8px; }
+.co-card-num { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
+.co-card-pct { font-size: 12px; color: var(--text-muted); }
+.split-bar-bg { height: 6px; background: var(--border); border-radius: 3px; margin-top: 12px; overflow: hidden; display: flex; }
+.split-bar-gd { height: 6px; background: var(--gd); transition: width 0.5s; }
+.split-bar-ss { height: 6px; background: var(--ss); transition: width 0.5s; }
+.split-legend { display: flex; gap: 14px; margin-top: 8px; }
+.split-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-secondary); }
+.split-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+/* ── Leaderboard ── */
+.lb-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.lb-row:last-child { border-bottom: none; }
+.lb-rank { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); width: 18px; flex-shrink: 0; }
+.lb-info { flex: 1; }
+.lb-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.lb-name { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+.lb-count { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
+.lb-bar-bg { height: 3px; background: var(--border); border-radius: 2px; }
+.lb-bar { height: 3px; border-radius: 2px; transition: width 0.6s ease; }
+
+/* ── Filter bar ── */
+.filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.filter-select {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 10px; font-size: 12px;
+  color: var(--text-primary); outline: none; cursor: pointer;
+  font-family: 'Inter', sans-serif;
 }
-
-/* icon row at top */
-.tile-header{display:flex;align-items:flex-start;justify-content:space-between;}
-.tile-icon{
-  width:40px;height:40px;border-radius:11px;
-  background:var(--bg3);
-  display:flex;align-items:center;justify-content:center;
-  font-size:20px;color:var(--white3);
-  transition:background 0.12s,color 0.12s;
-  flex-shrink:0;
+.filter-select:focus { border-color: var(--emerald-500); box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+.search-input {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 10px; font-size: 12px;
+  color: var(--text-primary); outline: none; flex: 1; min-width: 160px;
+  font-family: 'Inter', sans-serif;
 }
-.tile.selected .tile-icon{background:rgba(60,181,84,0.18);color:var(--green);}
-.tile-check-mark{
-  width:18px;height:18px;border-radius:50%;
-  background:var(--green);
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;transition:opacity 0.12s;flex-shrink:0;
+.search-input::placeholder { color: var(--text-muted); }
+.search-input:focus { border-color: var(--emerald-500); box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+
+/* ── Table ── */
+.table-wrap {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
-.tile.selected .tile-check-mark{opacity:1;}
-
-/* label + count at bottom */
-.tile-footer{display:flex;flex-direction:column;gap:3px;}
-.tile-label{font-size:12px;font-weight:600;color:var(--white2);line-height:1.3;}
-.tile.selected .tile-label{color:var(--green);}
-.tile-count{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--white4);line-height:1;}
-.tile.selected .tile-count{color:var(--green);}
-
-/* ── Confirm button ── */
-.confirm-btn{width:100%;border:none;border-radius:12px;padding:17px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s,transform 0.08s;letter-spacing:-0.01em;margin-bottom:18px;}
-.confirm-btn:active{transform:scale(0.98);}
-.confirm-btn.active-gd{background:var(--gd);color:#fff;}
-.confirm-btn.active-ss{background:var(--ss);color:#0D1F0F;}
-.confirm-btn.inactive{background:var(--bg3);color:var(--white4);cursor:not-allowed;}
-
-/* ── Banner ── */
-.banner{border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:13px;display:none;align-items:center;gap:8px;}
-.banner.show{display:flex;}
-.banner.syncing{background:rgba(60,181,84,0.1);border:1px solid rgba(60,181,84,0.3);color:var(--greenM);}
-.banner.done{background:rgba(60,181,84,0.12);border:1px solid rgba(60,181,84,0.3);color:var(--green);}
-.banner.error{background:rgba(255,77,106,0.1);border:1px solid rgba(255,77,106,0.3);color:var(--red);}
-
-/* ── Recent ── */
-.recent-list{display:flex;flex-direction:column;gap:6px;}
-.recent-row{display:flex;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:9px 12px;gap:8px;}
-.recent-co-badge{font-size:9px;font-weight:700;letter-spacing:0.04em;padding:2px 7px;border-radius:4px;flex-shrink:0;text-transform:uppercase;}
-.recent-co-badge.gd{background:rgba(60,181,84,0.15);color:var(--gd);border:1px solid rgba(60,181,84,0.3);}
-.recent-co-badge.ss{background:rgba(93,202,165,0.15);color:var(--ss);border:1px solid rgba(93,202,165,0.3);}
-.recent-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-.recent-name{font-size:12px;font-weight:500;color:var(--white);flex:1;}
-.recent-time{font-size:10px;color:var(--white4);font-family:'JetBrains Mono',monospace;flex-shrink:0;}
-.empty-state{text-align:center;padding:24px 0;color:var(--white4);font-size:13px;}
-
-@keyframes spin{to{transform:rotate(360deg);}}
-.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,0.25);border-top-color:currentColor;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
+.table-head {
+  display: grid; grid-template-columns: 1fr 140px 180px;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+.table-row {
+  display: grid; grid-template-columns: 1fr 140px 180px;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  align-items: center; transition: background 0.1s;
+}
+.table-row:last-child { border-bottom: none; }
+.table-row:hover { background: var(--surface-2); }
+.src-cell { display: flex; align-items: center; gap: 8px; }
+.src-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.src-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.co-badge {
+  display: inline-flex; align-items: center;
+  font-size: 10px; font-weight: 600; padding: 2px 8px;
+  border-radius: 4px; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.co-badge.gd { background: var(--gd-bg); color: var(--gd); border: 1px solid var(--gd-border); }
+.co-badge.ss { background: var(--ss-bg); color: var(--ss); border: 1px solid var(--ss-border); }
+.ts-cell { font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+.empty-row { padding: 40px 16px; text-align: center; color: var(--text-muted); font-size: 13px; }
+.table-footer { padding: 10px 16px; font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--border); background: var(--surface-2); }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="logo-row">
-    <div class="logo-mark">
+<nav class="nav">
+  <div class="nav-left">
+    <div class="nav-logo">
       <svg width="18" height="18" viewBox="0 0 17 17" fill="none">
         <path d="M8.5 1.5C8.5 1.5 3.5 4.5 3.5 9C3.5 11 5 13 8.5 13.5C8.5 13.5 8.5 11.5 8.5 10.5" stroke="#fff" stroke-width="1.35" stroke-linecap="round"/>
         <path d="M8.5 1.5C8.5 1.5 13.5 4.5 13.5 9C13.5 11 12 13 8.5 13.5" stroke="#fff" stroke-width="1.35" stroke-linecap="round"/>
@@ -145,170 +381,344 @@ html,body{background:var(--bg);color:var(--white);font-family:'Inter','Helvetica
       </svg>
     </div>
     <div>
-      <div class="logo-name">Omnigreen Deliveries</div>
-      <div class="logo-sub">Referral Logger</div>
+      <div class="nav-brand">Omnigreen Deliveries</div>
+      <div class="nav-sub">Referral Analytics</div>
     </div>
+    <div class="nav-divider"></div>
+    <div class="nav-section">Operations Dashboard</div>
   </div>
-  <div class="logged-pill">Logged: <span id="logged-count">0</span></div>
-</div>
-
-<div class="body">
-  <div id="banner" class="banner"></div>
-
-  <!-- Step 1 -->
-  <div class="step-label"><span class="step-num">1</span>Delivering for</div>
-  <div class="company-row">
-    <button class="company-tile gd" id="co-gd" onclick="selectCompany('grassdoor')" aria-label="Grassdoor">
-      <div class="company-check"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="company-icon-wrap"><i class="ti ti-plant-2"></i></div>
-      <div class="company-name">Grassdoor</div>
-    </button>
-    <button class="company-tile ss" id="co-ss" onclick="selectCompany('stashdash')" aria-label="Stashdash">
-      <div class="company-check"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="#0D1F0F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="company-icon-wrap"><i class="ti ti-briefcase"></i></div>
-      <div class="company-name">Stashdash</div>
-    </button>
+  <div class="nav-right">
+    <div class="live-badge"><div class="live-dot"></div>Live</div>
+    <button class="theme-btn" onclick="toggleTheme()" title="Toggle dark mode"><i class="ti ti-moon-stars"></i></button>
+    <button class="btn btn-secondary" onclick="loadData()"><i class="ti ti-refresh"></i> Refresh</button>
+    <a href="/" class="btn btn-primary"><i class="ti ti-device-mobile"></i> Driver view</a>
   </div>
+</nav>
 
-  <div class="divider"></div>
+<div class="page">
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <div style="font-size:13px;color:var(--text-muted)">Loading from Airtable…</div>
+  </div>
+  <div id="error" class="error-box" style="display:none"></div>
+  <div id="content" style="display:none">
 
-  <!-- Step 2 -->
-  <div class="step-label"><span class="step-num">2</span>How did they hear about us?</div>
-  <div class="src-grid" id="src-grid"></div>
+    <!-- KPI Strip -->
+    <div class="kpi-grid" id="kpi-grid"></div>
 
-  <button class="confirm-btn inactive" id="confirm-btn" onclick="logEntry()">
-    Select company &amp; source to continue
-  </button>
+    <!-- Company breakdown -->
+    <div class="section-head">
+      <div class="section-title">Company breakdown</div>
+      <span id="last-updated" style="font-size:11px;color:var(--text-muted)"></span>
+    </div>
+    <div class="co-grid" id="co-grid"></div>
 
-  <div class="step-label" style="margin-bottom:8px">Recent entries</div>
-  <div class="recent-list" id="recent-list">
-    <div class="empty-state">No entries yet — log your first delivery above.</div>
+    <div class="divider"></div>
+
+    <!-- Charts -->
+    <div class="two-col" style="margin-bottom:12px;">
+      <div class="card">
+        <div class="card-title">Referral source breakdown</div>
+        <div class="card-sub">All entries by channel — all time</div>
+        <canvas id="bar-chart" height="210"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">Channel leaderboard</div>
+        <div class="card-sub">Ranked by total response volume</div>
+        <div id="leaderboard"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-title">Monthly response volume</div>
+      <div class="card-sub">Rolling 6-month trend across all channels</div>
+      <canvas id="line-chart" height="90"></canvas>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Data table -->
+    <div class="section-head">
+      <div class="section-title">Response log</div>
+      <button class="btn btn-secondary" onclick="exportCSV()"><i class="ti ti-download"></i> Export CSV</button>
+    </div>
+    <div class="filter-bar">
+      <input class="search-input" id="search" placeholder="Search source…" oninput="renderTable()"/>
+      <select class="filter-select" id="filter-co" onchange="renderTable()">
+        <option value="all">All companies</option>
+        <option value="Grassdoor">Grassdoor</option>
+        <option value="Stashdash">Stashdash</option>
+      </select>
+      <select class="filter-select" id="filter-range" onchange="renderTable()">
+        <option value="all">All time</option>
+        <option value="today">Today</option>
+        <option value="week">This week</option>
+        <option value="month">This month</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <div class="table-head"><span>Source</span><span>Company</span><span>Date &amp; Time</span></div>
+      <div id="table-body"></div>
+    </div>
+    <div id="table-footer" class="table-footer"></div>
+
   </div>
 </div>
 
 <script>
-const SOURCES=[
-  {id:'yelp',      label:'Yelp',             icon:'ti-star'},
-  {id:'wom',       label:'Word of mouth',    icon:'ti-messages'},
-  {id:'weedmaps',  label:'Weedmaps',         icon:'ti-map-pin'},
-  {id:'leafly',    label:'Leafly',           icon:'ti-leaf'},
-  {id:'mailer',    label:'Mailer / Hand out',icon:'ti-mail'},
-  {id:'instagram', label:'Instagram',        icon:'ti-brand-instagram'},
-  {id:'google',    label:'Google',           icon:'ti-brand-google'},
-  {id:'friendfam', label:'Friend / Family',  icon:'ti-users'},
-  {id:'facebook',  label:'Facebook',         icon:'ti-brand-facebook'},
-];
-const SRC_COLORS=['#3CB554','#5DCAA5','#FFB547','#8B6FE8','#4FC3F7','#FF8A65','#81C784','#F06292','#FFD54F'];
+// ── Theme ──
+let dark = localStorage.getItem('og_theme') === 'dark';
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.querySelector('.theme-btn i').className = dark ? 'ti ti-sun' : 'ti ti-moon-stars';
+}
+function toggleTheme() { dark = !dark; localStorage.setItem('og_theme', dark ? 'dark' : 'light'); applyTheme(); }
+applyTheme();
 
-let selectedCompany=null,selectedSource=null,sessionCount=0;
-const counts=(()=>{try{return JSON.parse(localStorage.getItem('og_counts_v3')||'{}');}catch{return{};}})();
-const recent=(()=>{try{return JSON.parse(localStorage.getItem('og_recent_v3')||'[]');}catch{return[];}})();
-function save(){try{localStorage.setItem('og_counts_v3',JSON.stringify(counts));localStorage.setItem('og_recent_v3',JSON.stringify(recent.slice(0,30)));}catch{}}
+// ── Config ──
+const SOURCES = ['Yelp','Word of mouth','Weedmaps','Leafly','Mailer / Hand out','Instagram','Google','Friend / Family','Facebook'];
+const CHART_COLORS = ['#059669','#0891B2','#7C3AED','#D97706','#DB2777','#2563EB','#65A30D','#DC2626','#9333EA'];
+const WEEK = 7*86400000, MONTH = 30*86400000;
+let allRecords = [], barChart = null, lineChart = null;
 
-function buildGrid(){
-  const grid=document.getElementById('src-grid');
-  grid.innerHTML='';
-  SOURCES.forEach((s,i)=>{
-    const btn=document.createElement('button');
-    btn.className='tile';btn.id='tile-'+s.id;btn.setAttribute('aria-label',s.label);
-    btn.innerHTML=`
-      <div class="tile-header">
-        <div class="tile-icon"><i class="ti ${s.icon}"></i></div>
-        <div class="tile-check-mark">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-      </div>
-      <div class="tile-footer">
-        <span class="tile-label">${s.label}</span>
-        <span class="tile-count" id="cnt-${s.id}">${counts[s.id]||0}</span>
-      </div>`;
-    btn.addEventListener('click',()=>selectSource(s.id));
-    grid.appendChild(btn);
-  });
+function fmt(n) { return Number(n).toLocaleString(); }
+function fmtFull(str) {
+  if (!str) return '—';
+  const d = new Date(str);
+  if (isNaN(d)) return str;
+  return d.toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
 
-function selectCompany(id){
-  selectedCompany=(selectedCompany===id)?null:id;
-  document.getElementById('co-gd').classList.toggle('selected',selectedCompany==='grassdoor');
-  document.getElementById('co-ss').classList.toggle('selected',selectedCompany==='stashdash');
-  updateBtn();
-}
-
-function selectSource(id){
-  selectedSource=(selectedSource===id)?null:id;
-  SOURCES.forEach(s=>document.getElementById('tile-'+s.id).classList.toggle('selected',s.id===selectedSource));
-  updateBtn();
-}
-
-function updateBtn(){
-  const btn=document.getElementById('confirm-btn');
-  if(selectedCompany&&selectedSource){
-    const coClass=selectedCompany==='grassdoor'?'active-gd':'active-ss';
-    btn.className=`confirm-btn ${coClass}`;
-    btn.innerHTML=`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Confirm entry selection`;
-  } else if(!selectedCompany&&!selectedSource){
-    btn.className='confirm-btn inactive';btn.innerHTML='Select company &amp; source to continue';
-  } else if(!selectedCompany){
-    btn.className='confirm-btn inactive';btn.innerHTML='Select a company first';
-  } else {
-    btn.className='confirm-btn inactive';btn.innerHTML='Select a source to continue';
+// ── Load ──
+async function loadData() {
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('content').style.display = 'none';
+  document.getElementById('error').style.display = 'none';
+  try {
+    const res = await fetch('/api/data');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    allRecords = data.records || [];
+    render();
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
+  } catch(err) {
+    document.getElementById('loading').style.display = 'none';
+    const e = document.getElementById('error');
+    e.style.display = 'block';
+    e.textContent = `Failed to load data: ${err.message}. Check that AIRTABLE_TOKEN and AIRTABLE_BASE_ID are set in Netlify environment variables.`;
   }
 }
 
-async function logEntry(){
-  if(!selectedCompany||!selectedSource)return;
-  const src=SOURCES.find(s=>s.id===selectedSource);
-  const coLabel=selectedCompany==='grassdoor'?'Grassdoor':'Stashdash';
-  const ts=Date.now();
-  counts[src.id]=(counts[src.id]||0)+1;
-  sessionCount++;
-  recent.unshift({source:src.id,label:src.label,company:selectedCompany,coLabel,ts});
-  save();
-  document.getElementById('cnt-'+src.id).textContent=counts[src.id];
-  document.getElementById('logged-count').textContent=sessionCount;
-  renderRecent();
-  selectSource(null);
-  showBanner('syncing','Syncing to Airtable\u2026');
-  try{
-    const now=new Date(ts);const pad=n=>String(n).padStart(2,'0');
-    const loggedAt=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    const dateOnly=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
-    const res=await fetch('/api/log',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:src.label,channel:src.label,company:coLabel,loggedAt,date:dateOnly})});
-    if(res.ok){showBanner('done',`\u2713  Saved \u2014 ${coLabel} \u00b7 ${src.label}`);}
-    else{showBanner('error','\u26a0  Saved locally \u2014 sync failed');}
-  }catch{showBanner('error','\u26a0  Offline \u2014 saved locally');}
+function getRecords() { return allRecords.map(r => ({ ...r.fields, _id: r.id })); }
+
+function render() {
+  const records = getRecords();
+  const now = Date.now();
+
+  const total = records.length;
+  const thisWeek  = records.filter(r => r['Logged At'] && (now - new Date(r['Logged At']).getTime()) < WEEK).length;
+  const thisMonth = records.filter(r => r['Logged At'] && (now - new Date(r['Logged At']).getTime()) < MONTH).length;
+  const lastMonth = records.filter(r => { if (!r['Logged At']) return false; const a = now - new Date(r['Logged At']).getTime(); return a >= MONTH && a < 2*MONTH; }).length;
+
+  const srcMap = {};
+  records.forEach(r => { if (r.Source) srcMap[r.Source] = (srcMap[r.Source]||0) + 1; });
+  const topSrc = Object.entries(srcMap).sort((a,b) => b[1]-a[1])[0];
+
+  const trendUp = thisMonth >= lastMonth;
+  const trendDiff = Math.abs(thisMonth - lastMonth);
+
+  // KPIs
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-card">
+      <div class="kpi-accent" style="background:#059669"></div>
+      <div class="kpi-label">Total responses</div>
+      <div class="kpi-value">${fmt(total)}</div>
+      <div class="kpi-sub">All time</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-accent" style="background:#0891B2"></div>
+      <div class="kpi-label">This week</div>
+      <div class="kpi-value">${fmt(thisWeek)}</div>
+      <div class="kpi-sub">${fmt(thisMonth)} this month</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-accent" style="background:#D97706"></div>
+      <div class="kpi-label">Top channel</div>
+      <div class="kpi-value text">${topSrc ? topSrc[0] : '—'}</div>
+      <div class="kpi-sub">${topSrc ? fmt(topSrc[1]) + ' entries' : ''}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-accent" style="background:${trendUp ? '#059669' : '#DC2626'}"></div>
+      <div class="kpi-label">30-day trend</div>
+      <div class="kpi-value ${trendUp ? 'kpi-trend-up' : 'kpi-trend-down'}">${trendUp ? '↑' : '↓'} ${trendDiff}</div>
+      <div class="kpi-sub">vs prior 30 days</div>
+    </div>
+  `;
+
+  // Company split — fix: count by Company field, fallback to checking source
+  const gdCount = records.filter(r => (r.Company || '').toLowerCase().includes('grass')).length;
+  const ssCount = records.filter(r => (r.Company || '').toLowerCase().includes('stash')).length;
+  const untagged = total - gdCount - ssCount;
+  const gdPct = total > 0 ? Math.round(gdCount / total * 100) : 0;
+  const ssPct = total > 0 ? Math.round(ssCount / total * 100) : 0;
+
+  const todayStr = new Date().toDateString();
+  const isToday = r => r['Logged At'] && new Date(r['Logged At']).toDateString() === todayStr;
+  const gdToday = records.filter(r => isToday(r) && (r.Company||'').toLowerCase().includes('grass')).length;
+  const ssToday = records.filter(r => isToday(r) && (r.Company||'').toLowerCase().includes('stash')).length;
+
+  document.getElementById('co-grid').innerHTML = `
+    <div class="co-card">
+      <div class="co-card-label" style="color:var(--gd)">Grassdoor</div>
+      <div class="co-card-num" style="color:var(--gd)">${fmt(gdCount)}</div>
+      <div class="co-card-pct">${gdPct}% of total &middot; <strong style="color:var(--gd)">${fmt(gdToday)}</strong> today</div>
+    </div>
+    <div class="co-card">
+      <div class="co-card-label" style="color:var(--ss)">Stashdash</div>
+      <div class="co-card-num" style="color:var(--ss)">${fmt(ssCount)}</div>
+      <div class="co-card-pct">${ssPct}% of total &middot; <strong style="color:var(--ss)">${fmt(ssToday)}</strong> today</div>
+    </div>
+    <div class="co-card" style="grid-column:span 1;">
+      <div class="co-card-label" style="color:var(--text-muted)">Volume split</div>
+      <div class="split-bar-bg">
+        <div class="split-bar-gd" style="width:${gdPct}%"></div>
+        <div class="split-bar-ss" style="width:${ssPct}%"></div>
+      </div>
+      <div class="split-legend">
+        <div class="split-legend-item"><div class="split-dot" style="background:var(--gd)"></div>Grassdoor ${gdPct}%</div>
+        <div class="split-legend-item"><div class="split-dot" style="background:var(--ss)"></div>Stashdash ${ssPct}%</div>
+        ${untagged > 0 ? `<div class="split-legend-item"><div class="split-dot" style="background:var(--border-2)"></div>Untagged ${untagged}</div>` : ''}
+      </div>
+    </div>
+  `;
+
+  // Bar chart
+  const gridColor = dark ? '#334155' : '#E2E8F0';
+  const tickColor = dark ? '#64748B' : '#94A3B8';
+  const barData = SOURCES.map(s => srcMap[s] || 0);
+  const labels = SOURCES.map(s => s.length > 12 ? s.slice(0,11)+'…' : s);
+  if (barChart) barChart.destroy();
+  barChart = new Chart(document.getElementById('bar-chart'), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: barData, backgroundColor: CHART_COLORS, borderRadius: 5, borderSkipped: false }] },
+    options: {
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.raw + ' entries' } } },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } } },
+        y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10 } } }
+      },
+      responsive: true, maintainAspectRatio: true
+    }
+  });
+
+  // Leaderboard
+  const maxCount = Math.max(...Object.values(srcMap), 1);
+  const sorted = SOURCES.map((s,i) => ({ name: s, count: srcMap[s]||0, color: CHART_COLORS[i] })).sort((a,b) => b.count-a.count);
+  document.getElementById('leaderboard').innerHTML = sorted.map((s,i) => `
+    <div class="lb-row">
+      <div class="lb-rank">${i+1}</div>
+      <div class="lb-info">
+        <div class="lb-top">
+          <span class="lb-name">${s.name}</span>
+          <span class="lb-count" style="color:${s.color}">${fmt(s.count)}</span>
+        </div>
+        <div class="lb-bar-bg">
+          <div class="lb-bar" style="width:${Math.round(s.count/maxCount*100)}%;background:${s.color}"></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Line chart
+  const months = [], monthCounts = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(); d.setDate(1); d.setMonth(d.getMonth()-i);
+    months.push(d.toLocaleDateString('en-US', { month:'short', year:'2-digit' }));
+    monthCounts.push(records.filter(r => {
+      if (!r['Logged At']) return false;
+      const rd = new Date(r['Logged At']);
+      return rd.getMonth() === d.getMonth() && rd.getFullYear() === d.getFullYear();
+    }).length);
+  }
+  if (lineChart) lineChart.destroy();
+  lineChart = new Chart(document.getElementById('line-chart'), {
+    type: 'line',
+    data: { labels: months, datasets: [{
+      data: monthCounts, borderColor: '#059669',
+      backgroundColor: dark ? 'rgba(5,150,105,0.08)' : 'rgba(5,150,105,0.06)',
+      borderWidth: 2, pointBackgroundColor: '#059669', pointRadius: 4,
+      tension: 0.35, fill: true
+    }]},
+    options: {
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.raw + ' entries' } } },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 } } },
+        y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 } } }
+      },
+      responsive: true, maintainAspectRatio: true
+    }
+  });
+
+  renderTable();
 }
 
-let bannerTimer=null;
-function showBanner(type,msg){
-  const b=document.getElementById('banner');
-  b.className=`banner show ${type}`;
-  b.innerHTML=type==='syncing'?`<div class="spinner"></div>${msg}`:msg;
-  clearTimeout(bannerTimer);
-  if(type!=='syncing')bannerTimer=setTimeout(()=>{b.className='banner';},3000);
+function getFiltered() {
+  const search = document.getElementById('search').value.toLowerCase();
+  const co = document.getElementById('filter-co').value;
+  const range = document.getElementById('filter-range').value;
+  const now = Date.now();
+  return getRecords().filter(r => {
+    if (search && !(r.Source||'').toLowerCase().includes(search)) return false;
+    if (co !== 'all') {
+      const comp = (r.Company||'').toLowerCase();
+      if (co === 'Grassdoor' && !comp.includes('grass')) return false;
+      if (co === 'Stashdash' && !comp.includes('stash')) return false;
+    }
+    if (range === 'today') { const d = new Date(r['Logged At']||''); if (d.toDateString() !== new Date().toDateString()) return false; }
+    if (range === 'week' && r['Logged At'] && (now - new Date(r['Logged At']).getTime()) > WEEK) return false;
+    if (range === 'month' && r['Logged At'] && (now - new Date(r['Logged At']).getTime()) > MONTH) return false;
+    return true;
+  }).sort((a,b) => new Date(b['Logged At']||0) - new Date(a['Logged At']||0));
 }
 
-function fmtTime(ts){
-  const d=new Date(ts),now=new Date();
-  if(d.toDateString()===now.toDateString())return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-}
-
-function renderRecent(){
-  const list=document.getElementById('recent-list');
-  if(!recent.length){list.innerHTML='<div class="empty-state">No entries yet \u2014 log your first delivery above.</div>';return;}
-  list.innerHTML=recent.slice(0,10).map(e=>{
-    const idx=SOURCES.findIndex(s=>s.id===e.source);
-    const color=SRC_COLORS[idx]||'#3CB554';
-    const co=e.company==='grassdoor'?'gd':'ss';
-    return `<div class="recent-row"><div class="recent-dot" style="background:${color}"></div><span class="recent-co-badge ${co}">${e.coLabel}</span><span class="recent-name">${e.label}</span><span class="recent-time">${fmtTime(e.ts)}</span></div>`;
+function renderTable() {
+  const filtered = getFiltered();
+  const shown = filtered.slice(0, 100);
+  if (!shown.length) {
+    document.getElementById('table-body').innerHTML = '<div class="empty-row">No entries match your filters</div>';
+    document.getElementById('table-footer').textContent = '';
+    return;
+  }
+  document.getElementById('table-body').innerHTML = shown.map(r => {
+    const idx = SOURCES.indexOf(r.Source);
+    const color = CHART_COLORS[idx] || '#059669';
+    const comp = (r.Company||'').toLowerCase();
+    const co = comp.includes('grass') ? 'gd' : 'ss';
+    const coLabel = comp.includes('grass') ? 'Grassdoor' : comp.includes('stash') ? 'Stashdash' : r.Company || '—';
+    return `<div class="table-row">
+      <div class="src-cell"><div class="src-dot" style="background:${color}"></div><span class="src-name">${r.Source||'—'}</span></div>
+      <span class="co-badge ${co}">${coLabel}</span>
+      <span class="ts-cell">${fmtFull(r['Logged At'])}</span>
+    </div>`;
   }).join('');
+  document.getElementById('table-footer').textContent = filtered.length > 100
+    ? `Showing 100 of ${fmt(filtered.length)} entries`
+    : `${fmt(filtered.length)} ${filtered.length === 1 ? 'entry' : 'entries'}`;
 }
 
-buildGrid();renderRecent();
-const today=new Date().toDateString();
-sessionCount=recent.filter(e=>new Date(e.ts).toDateString()===today).length;
-document.getElementById('logged-count').textContent=sessionCount;
+function exportCSV() {
+  const filtered = getFiltered();
+  const rows = [['Source','Company','Date & Time'], ...filtered.map(r => [`"${r.Source||''}"`, `"${r.Company||''}"`, `"${fmtFull(r['Logged At'])}"`])];
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'omnigreen-referrals.csv';
+  a.click();
+}
+
+loadData();
 </script>
 </body>
 </html>
